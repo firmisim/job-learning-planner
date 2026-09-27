@@ -1,0 +1,4 @@
+interface:
+  display_name: "Job Learning Roadmap"
+  short_description: "Turn current Role facts into a personal learning guide"
+  default_prompt: "Use $job-learning-roadmap for the current Roadmap request prepared by the app."

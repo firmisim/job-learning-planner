@@ -1,0 +1,19 @@
+{% extends "base.html" %}
+{% block content %}
+  <header class="roadmap-meta reading-content">
+    <a class="back-link" href="/roadmaps">← {{ t('roadmap.back') }}</a>
+    <p class="section-kicker">{{ t('roadmap.version') }}</p>
+    <div class="metadata-line"><time>{{ view.generated_at }}</time><span>{{ t('roadmap.latest') if view.latest else t('roadmap.historical') }}</span><span>{{ t('roadmap.matches_inputs') if view.matches_current_inputs else t('roadmap.inputs_changed') }}</span></div>
+  </header>
+  <article class="panel roadmap-content">{{ view.html|safe }}</article>
+  <section class="reading-content section-divider roadmap-utilities">
+    <div class="section-heading"><div><p class="section-kicker">{{ t('roadmap.version_actions') }}</p><h3>{{ t('roadmap.keep_remove') }}</h3><p class="muted">{{ t('roadmap.actions_help') }}</p></div></div>
+    <div class="button-row">
+      <a class="button button-secondary" href="/roadmaps/{{ view.roadmap_id }}/export">{{ t('roadmap.export_markdown') }}</a>
+      <form action="/roadmaps/{{ view.roadmap_id }}/delete" method="post" data-confirm="{{ t('roadmap.delete_confirm', version=t('roadmap.latest') if view.latest else t('roadmap.historical'), role=view.current_role.name, generated=view.generated_at) }}">
+        <input type="hidden" name="role_id" value="{{ view.current_role.role_id }}">
+        <button class="button button-danger button-quiet" type="submit">{{ t('roadmap.delete') }}</button>
+      </form>
+    </div>
+  </section>
+{% endblock %}

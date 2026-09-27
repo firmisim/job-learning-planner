@@ -1,0 +1,8 @@
+<div id="interaction-result" role="status" aria-live="polite">
+  {%- if notice %}
+    <div class="notice notice-{{ notice_level }}">
+      <strong>{{ notice_title|default(t('feedback.completed') if notice_level == 'success' else t('feedback.attention')) }}</strong>
+      <span>{{ notice }}</span>
+    </div>
+  {% endif -%}
+</div>

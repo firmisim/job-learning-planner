@@ -1,0 +1,87 @@
+{% extends "base.html" %}
+{% from "partials/list_controls.html" import search, pagination with context %}
+{% block content %}
+  {% if view.current_role %}
+  <section class="panel" id="jd-input">
+    <div class="section-heading"><div><p class="section-kicker">{{ t('market.input.kicker') }}</p><h2>{{ t('market.input.title') }}</h2></div><span class="badge badge-neutral">{{ t('market.jd_count', count=view.jd_count) }}</span></div>
+    <div class="input-task-grid market-input-layout">
+      <section class="input-task-card market-input-group">
+        <div><p class="section-kicker">{{ t('market.manual.kicker') }}</p><h3>{{ t('market.manual.title') }}</h3><p>{{ t('market.manual.help') }}</p></div>
+        <form action="/market/jobs" method="post" class="form-stack">
+          <input type="hidden" name="role_id" value="{{ view.current_role.role_id }}">
+          <input type="hidden" name="expected_sha256" value="{{ view.jds_sha256 }}">
+          <label>{{ t('market.form.job_title') }}<input name="title" placeholder="{{ t('market.form.job_title_placeholder') }}" required></label>
+          <label>{{ t('market.form.company') }} <span class="muted">{{ t('common.optional') }}</span><input name="company"></label>
+          <label>{{ t('market.form.source_url') }} <span class="muted">{{ t('common.optional') }}</span><input name="source_url" type="url"></label>
+          <label>{{ t('market.form.jd_text') }}<textarea name="jd_text" rows="8" required></textarea></label>
+          <button class="button" type="submit">{{ t('market.form.add_job') }}</button>
+        </form>
+      </section>
+      <section class="input-task-card market-input-group">
+        <div><p class="section-kicker">{{ t('market.import.kicker') }}</p><h3>{{ t('market.import.title') }}</h3><p>{{ t('market.import.help') }}</p></div>
+        <form action="/market/import" method="post" enctype="multipart/form-data" class="form-stack" data-confirm="{{ t('market.import.confirm') }}">
+          <input type="hidden" name="role_id" value="{{ view.current_role.role_id }}">
+          <input type="hidden" name="expected_sha256" value="{{ view.jds_sha256 }}">
+          <label>{{ t('market.import.workbook') }}<input name="workbook" type="file" accept=".xlsx" required></label>
+          <label>{{ t('market.import.action') }}<select name="mode"><option value="append">{{ t('market.import.append') }}</option><option value="replace">{{ t('market.import.replace') }}</option></select></label>
+          <p class="muted">{{ t('market.import.format_help') }}</p>
+          <button class="button button-secondary" type="submit">{{ t('market.import.submit') }}</button>
+        </form>
+      </section>
+    </div>
+  </section>
+
+  <section class="panel secondary-panel" id="jd-list">
+    <div class="section-heading"><div><p class="section-kicker">{{ t('market.library.kicker') }}</p><h2>{{ t('market.library.title') }}</h2></div><span class="badge badge-neutral">{{ view.jd_count }}</span></div>
+    {{ search(job_page, 'jd_query', 'jd-list', 'market.search.jobs') }}
+    {% if job_page.items %}
+    <form action="/market/jobs/delete" method="post" data-bulk-form data-selection-list="market-jd" data-selection-role="{{ view.current_role.role_id }}" data-selection-query="{{ job_page.query }}" data-confirm="{{ t('market.delete_selected.confirm') }}">
+      <input type="hidden" name="role_id" value="{{ view.current_role.role_id }}">
+      <input type="hidden" name="expected_sha256" value="{{ view.jds_sha256 }}">
+      <div class="table-wrap"><table><thead><tr><th><span class="sr-only">{{ t('common.select') }}</span></th><th>{{ t('market.table.jd') }}</th><th>{{ t('market.table.analysis') }}</th><th>{{ t('market.table.source') }}</th></tr></thead><tbody>
+      {% for job in job_page.items %}
+        <tr>
+          <td><input type="checkbox" name="job_id" value="{{ job.job_id }}" data-bulk-item aria-label="{{ t('market.select_job', title=job.title) }}"></td>
+          <td><details><summary><strong>{{ job.title }}</strong>{% if job.company %} · {{ job.company }}{% endif %}</summary><p class="evidence-text reading-content">{{ job.jd_text }}</p></details></td>
+          <td><span class="badge {{ 'badge-success' if job.analysis_current else 'badge-warning' }}">{{ t('status.current') if job.analysis_current else t('status.needs_analysis') }}</span></td>
+          <td>{% if job.source_url %}<a class="text-link" href="{{ job.source_url }}" rel="noreferrer">{{ t('common.open') }}</a>{% else %}—{% endif %}</td>
+        </tr>
+      {% endfor %}
+      </tbody></table></div>
+      <div class="form-actions"><span><span data-selected-count>0</span> {{ t('common.selected') }}</span><button class="button button-danger button-quiet" type="submit" data-bulk-submit disabled>{{ t('common.delete_selected') }}</button></div>
+    </form>
+    {{ pagination(job_page, 'jd_query', 'jd_page', 'jd-list') }}
+    {% elif job_page.query %}<div class="empty-state"><h3>{{ t('market.empty_search.title') }}</h3><p>{{ t('common.clear_or_try') }}</p></div>
+    {% else %}<div class="empty-state"><h3>{{ t('market.empty_jobs.title') }}</h3><p>{{ t('market.empty_jobs.body') }}</p></div>{% endif %}
+  </section>
+
+  <section class="panel secondary-panel" id="analysis">
+    <div class="section-heading"><div><p class="section-kicker">{{ t('market.analysis.kicker') }}</p><h2>{{ t('market.analysis.title') }}</h2></div><span class="badge badge-neutral">{{ t('market.analysis.counts', current=view.current_analysis_count, pending=view.pending_analysis_count) }}</span></div>
+    {% if view.jobs %}
+    {% if view.analysis_handoff_message and not notice %}<div class="notice notice-{{ 'error' if view.analysis_handoff_state == 'error' else 'success' }}"><span>{{ localize(view.analysis_handoff_message) }}</span></div>{% endif %}
+    {% if view.pending_analysis_count %}<div class="notice notice-warning"><strong>{{ t('market.analysis.waiting', count=view.pending_analysis_count) }}</strong><span>{{ t('market.analysis.pending_help') }}</span></div>
+    {% else %}<p>{{ t('market.analysis.current_help') }}</p>{% endif %}
+    <form action="/market/analysis" method="post"><input type="hidden" name="role_id" value="{{ view.current_role.role_id }}"><button class="button button-secondary" type="submit">{{ t('market.analysis.prepare_again') if not view.pending_analysis_count else t('market.analysis.prepare') }}</button></form>
+    {% else %}<div class="empty-state"><h3>{{ t('market.analysis.empty_title') }}</h3><p>{{ t('market.analysis.empty_body') }}</p></div>{% endif %}
+  </section>
+
+  <section class="panel secondary-panel" id="market-signals">
+    <div class="section-heading"><div><p class="section-kicker">{{ t('market.signals.kicker') }}</p><h2>{{ t('market.signals.title') }}</h2></div><span class="badge badge-neutral">{{ t('market.signals.sample', analyzed=view.sample_size, total=view.jd_count) }}</span></div>
+    {{ search(signal_page, 'signal_query', 'market-signals', 'market.search.signals') }}
+    {% if signal_page.items %}
+      <div class="stack-list signal-list">
+      {% for signal in signal_page.items %}
+        <article class="signal-entry"><div class="section-heading"><h3>{{ signal.atomic_expression }}</h3><span class="muted">{{ signal.jd_count }} / {{ signal.sample_size }} JDs</span></div>
+          <details><summary>{{ t('market.signals.found_in') }}</summary>{% for item in signal.evidence %}<p><strong>{{ item.job_title }}</strong><br><code>{{ item.source_expression }}</code><br>{{ item.evidence }}</p>{% endfor %}</details>
+        </article>
+      {% endfor %}
+      </div>
+      {{ pagination(signal_page, 'signal_query', 'signal_page', 'market-signals') }}
+    {% elif signal_page.query %}<div class="empty-state"><h3>{{ t('market.signals.no_match') }}</h3><p>{{ t('market.signals.search_help') }}</p></div>
+    {% elif view.jobs %}<div class="empty-state"><h3>{{ t('market.signals.none_current') }}</h3><p>{{ t('market.signals.refresh_help') }}</p></div>
+    {% else %}<div class="empty-state"><h3>{{ t('market.signals.none') }}</h3><p>{{ t('market.signals.none_help') }}</p></div>{% endif %}
+  </section>
+  {% else %}
+  <section class="empty-state large"><div><h2>{{ t('role.create_first') }}</h2><p>{{ t('role.manage_in_settings') }}</p><a class="button" href="/settings">{{ t('common.open_settings') }}</a></div></section>
+  {% endif %}
+{% endblock %}

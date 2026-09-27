@@ -1,0 +1,46 @@
+{% extends "base.html" %}
+{% block page_heading %}{% endblock %}
+{% block content %}
+    <div class="queue-navigation"><div><strong>{{ t('inbox.position', current=view.position, total=view.remaining_count) }}</strong><small>{{ t('inbox.pending_count', count=view.remaining_count) }}</small></div><a class="text-link" href="/capabilities#pending-candidates">{{ t('inbox.list') }}</a></div>
+  {% if view.error_message %}<div class="notice notice-error"><strong>{{ t('feedback.validation_blocked') }}</strong><span>{{ localize(view.error_message) }}</span></div>{% endif %}
+
+  <section class="panel inbox-workspace">
+    <div class="section-heading"><div><p class="section-kicker">{{ t('inbox.atomic_expression') }}</p><h1>{{ view.candidate.atomic_expression }}</h1><p>{{ t('inbox.seen_in', count=view.candidate.jd_count, total=view.candidate.sample_size) }}</p></div></div>
+  <div class="inbox-primary-layout">
+    <div class="inbox-context-column page-stack">
+      <section class="inbox-evidence">
+        <h3>{{ t('inbox.market_evidence') }}</h3>
+        {% if view.candidate.evidence %}
+          {% set key_evidence = view.candidate.evidence[0] %}
+          <article class="evidence-card key-evidence"><strong>{{ key_evidence.job_title }}</strong><code>{{ key_evidence.source_expression }}</code><p class="evidence-quote">{{ key_evidence.evidence }}</p></article>
+          {% if view.candidate.evidence|length > 1 %}<details class="evidence-disclosure"><summary>{{ t('inbox.more_evidence', count=view.candidate.evidence|length - 1) }}</summary><div class="evidence-list">{% for item in view.candidate.evidence[1:] %}<article class="evidence-card"><strong>{{ item.job_title }}</strong><code>{{ item.source_expression }}</code><p class="evidence-quote">{{ item.evidence }}</p></article>{% endfor %}</div></details>{% endif %}
+        {% endif %}
+      </section>
+
+      <section class="recommendation-summary">
+        <div class="section-heading"><div><p class="section-kicker">{{ t('inbox.recommendation') }}</p><h3>{{ t('inbox.advice_only') }}</h3></div>{% if view.recommendation %}<span class="badge badge-ready">{{ t('inbox.action.' ~ view.recommendation.recommended_action) }}</span>{% endif %}</div>
+        {% if view.recommendation %}
+          <dl class="recommendation-brief"><div><dt>{{ t('inbox.suggested_action') }}</dt><dd>{{ t('inbox.action.' ~ view.recommendation.recommended_action) }}</dd></div><div><dt>{{ t('inbox.suggested_target') if view.recommendation.recommended_action == 'merge' else t('inbox.suggested_name') }}</dt><dd>{{ view.recommendation.recommended_merge_target or view.recommendation.recommended_canonical_name or '—' }}</dd></div></dl>
+          <p class="recommendation-reason">{{ view.recommendation.rationale|truncate(180, true, '…') }}</p>
+          <details class="recommendation-details"><summary>{{ t('inbox.show_recommendation') }}</summary><div class="detail-grid"><div><dt>{{ t('inbox.candidate') }}</dt><dd>{{ view.recommendation.explanation }}</dd></div><div><dt>{{ t('inbox.learning_value') }}</dt><dd>{{ view.recommendation.learning_value }}</dd></div></div><p class="callout">{{ view.recommendation.rationale }}</p>{% if view.recommendation.evidence_quotes %}<ul>{% for quote in view.recommendation.evidence_quotes %}<li>{{ quote }}</li>{% endfor %}</ul>{% endif %}</details>
+        {% else %}
+          {% if view.recommendation_handoff_message and not notice %}<div class="notice notice-{{ 'error' if view.recommendation_handoff_state == 'error' else 'success' }}"><span>{{ localize(view.recommendation_handoff_message) }}</span></div>{% endif %}
+          <p>{{ t('inbox.recommendation_optional') }}</p>
+          <form action="/capabilities/inbox/{{ view.candidate.candidate_fingerprint }}/recommendation" method="post"><button class="button button-quiet" type="submit">{{ t('inbox.prepare_analysis_again') if view.recommendation_handoff_state else t('inbox.prepare_analysis') }}</button></form>
+        {% endif %}
+      </section>
+    </div>
+
+    <section class="inbox-decisions"><p class="section-kicker">{{ t('inbox.your_choice') }}</p><h2>{{ t('inbox.choose_action') }}</h2><p>{{ t('inbox.decision_help') }}</p><div class="decision-stack">
+      <form action="/capabilities/inbox/{{ view.candidate.candidate_fingerprint }}/add" method="post" class="decision-card{% if view.recommendation and view.recommendation.recommended_action == 'add' %} is-recommended{% endif %}"><input type="hidden" name="role_id" value="{{ view.workspace.current_role.role_id }}"><input type="hidden" name="expected_catalog_sha256" value="{{ view.workspace.catalog_sha256 }}"><div class="decision-heading"><h3>{{ t('inbox.add_new') }}</h3>{% if view.recommendation and view.recommendation.recommended_action == 'add' %}<span class="badge badge-ready">{{ t('inbox.suggested') }}</span>{% endif %}</div><label>{{ t('capability.name') }}<input name="canonical_name" value="{{ view.recommendation.recommended_canonical_name if view.recommendation and view.recommendation.recommended_canonical_name else view.candidate.atomic_expression }}" required></label><button class="button button-secondary" type="submit">{{ t('inbox.add_continue') }}</button></form>
+      <section class="decision-card{% if view.recommendation and view.recommendation.recommended_action == 'merge' %} is-recommended{% endif %}">
+        <div class="decision-heading"><h3>{{ t('inbox.merge_existing') }}</h3>{% if view.recommendation and view.recommendation.recommended_action == 'merge' %}<span class="badge badge-ready">{{ t('inbox.suggested') }}</span>{% endif %}</div>
+        {% if view.merge_candidates %}<div class="merge-target-list"><p class="muted">{{ t('inbox.closest_matches') }}</p>{% for item in view.merge_candidates %}<label class="review-option"><input type="radio" form="merge-decision" name="capability_name" value="{{ item.name }}" required {% if view.recommendation and view.recommendation.recommended_merge_target == item.name %}checked{% endif %}><span><strong>{{ item.name }}</strong>{% if item.historical_expressions %}<small>{{ t('capability.related_expressions', expressions=item.historical_expressions|join(', ')) }}</small>{% endif %}</span></label>{% endfor %}</div>{% else %}<p class="muted">{{ t('inbox.no_strong_match') }}</p>{% endif %}
+        <details class="settings-disclosure merge-search-disclosure" {% if view.merge_search_query %}open{% endif %}><summary><div><strong>{{ t('capability.search_all') }}</strong><span>{{ t('inbox.find_target') }}</span></div></summary><div class="settings-disclosure-content"><form method="get" action="/capabilities/inbox/{{ view.candidate.candidate_fingerprint }}" class="merge-search-form"><label>{{ t('capability.name') }}<input type="search" name="merge_query" value="{{ view.merge_search_query }}" placeholder="{{ t('capability.search_all_names') }}"></label><button class="button button-secondary" type="submit">{{ t('common.search') }}</button>{% if view.merge_search_query %}<a class="text-link" href="/capabilities/inbox/{{ view.candidate.candidate_fingerprint }}">{{ t('common.clear') }}</a>{% endif %}</form>{% if view.merge_search_query %}{% if view.merge_search_results %}<div class="merge-target-list">{% for item in view.merge_search_results %}<label class="review-option"><input type="radio" form="merge-decision" name="capability_name" value="{{ item.name }}" required {% if view.recommendation and view.recommendation.recommended_merge_target == item.name %}checked{% endif %}><span><strong>{{ item.name }}</strong>{% if item.historical_expressions %}<small>{{ t('capability.related_expressions', expressions=item.historical_expressions|join(', ')) }}</small>{% endif %}</span></label>{% endfor %}</div>{% else %}<p class="muted">{{ t('inbox.no_additional_match') }}</p>{% endif %}{% endif %}</div></details>
+        <form id="merge-decision" action="/capabilities/inbox/{{ view.candidate.candidate_fingerprint }}/merge" method="post"><input type="hidden" name="role_id" value="{{ view.workspace.current_role.role_id }}"><input type="hidden" name="expected_catalog_sha256" value="{{ view.workspace.catalog_sha256 }}"><button class="button button-secondary" type="submit" {% if not view.merge_candidates and not view.merge_search_results %}disabled{% endif %}>{{ t('inbox.merge_continue') }}</button></form>
+      </section>
+      <form action="/capabilities/inbox/{{ view.candidate.candidate_fingerprint }}/skip" method="post" class="decision-card compact-skip{% if view.recommendation and view.recommendation.recommended_action == 'skip' %} is-recommended{% endif %}"><input type="hidden" name="role_id" value="{{ view.workspace.current_role.role_id }}"><input type="hidden" name="expected_skipped_sha256" value="{{ view.workspace.skipped_sha256 }}"><div class="decision-heading"><h3>{{ t('inbox.skip_role') }}</h3>{% if view.recommendation and view.recommendation.recommended_action == 'skip' %}<span class="badge badge-ready">{{ t('inbox.suggested') }}</span>{% endif %}</div><p>{{ t('inbox.skip_help') }}</p><button class="button button-quiet" type="submit">{{ t('inbox.skip_continue') }}</button></form>
+    </div></section>
+  </div>
+  </section>
+{% endblock %}

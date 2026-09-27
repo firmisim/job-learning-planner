@@ -1,0 +1,30 @@
+{% extends "base.html" %}
+{% from "partials/list_controls.html" import search, pagination with context %}
+{% block content %}
+  {% if error_message %}<div class="notice notice-error"><strong>{{ t('feedback.action_attention') }}</strong><span>{{ localize(error_message) }}</span></div>{% endif %}
+  {% if not view.current_role %}
+    <section class="empty-state large"><div><h2>{{ t('role.create_first') }}</h2><p>{{ t('learning.no_role_help') }}</p><a class="button" href="/settings">{{ t('common.open_settings') }}</a></div></section>
+  {% else %}
+    <section class="summary-strip two-item-summary"><div><span>{{ t('learning.relevant_capabilities') }}</span><strong>{{ view.capabilities|length }}</strong></div><div><span>{{ t('learning.facts') }}</span><strong>{{ t('common.shared_across_roles') }}</strong></div></section>
+    <section class="panel" id="learning-list">
+      <div class="section-heading"><div><p class="section-kicker">{{ t('nav.learning') }}</p><h2>{{ t('learning.find_capability') }}</h2><p>{{ t('learning.find_help') }}</p></div></div>
+      {{ search(learning_page, 'query', 'learning-list', 'capability.search_name') }}
+      {% if learning_page.items %}
+        <div class="learning-summary-list">
+          {% for item in learning_page.items %}
+            <article class="learning-summary-card">
+              <div class="list-item-content"><h3>{{ item.name }}</h3><div class="learning-row-facts"><span class="badge badge-{{ 'neutral' if item.current_level is none else 'ready' }}">{% if item.current_level is none %}{{ t('level.not_set') }}{% else %}{{ t('level.value', level=item.current_level) }}{% endif %}</span><p>{{ t('practice.record_count', count=item.practices|length) }} · {{ t('knowledge.label') }} {{ t('knowledge.status.' ~ (item.knowledge_status or 'missing')) }}</p></div></div>
+              <div class="learning-summary-action"><span class="badge badge-{{ 'ready' if item.included_in_roadmap else 'neutral' }}">{{ t('learning.roadmap_scope.included') if item.included_in_roadmap else t('learning.roadmap_scope.excluded') }}</span><a class="button button-quiet" href="/learning/capabilities/{{ item.capability_id }}">{{ t('learning.open_detail') }}</a></div>
+            </article>
+          {% endfor %}
+        </div>
+        {{ pagination(learning_page, 'query', 'page', 'learning-list') }}
+      {% elif learning_page.query %}
+        <div class="empty-state"><h3>{{ t('capability.no_match') }}</h3><p>{{ t('learning.clear_search_help') }}</p></div>
+      {% else %}
+        <div class="empty-state"><h3>{{ t('capability.none_mapped') }}</h3><p>{{ t('learning.resolve_inbox_help') }}</p><a class="button" href="/capabilities">{{ t('common.open_capabilities') }}</a></div>
+      {% endif %}
+    </section>
+    <section class="next-action"><div><h3>{{ t('learning.ready_to_plan') }}</h3><p>{{ t('learning.roadmap_help') }}</p></div><a class="button" href="/roadmaps">{{ t('common.open_roadmap') }}</a></section>
+  {% endif %}
+{% endblock %}

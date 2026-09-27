@@ -1,0 +1,27 @@
+{% macro search(page_data, query_name, anchor, placeholder_key='common.search_placeholder') %}
+<div class="list-controls">
+  <form class="list-search" method="get" action="{{ request.url.path }}#{{ anchor }}" role="search">
+    <label class="sr-only" for="{{ anchor }}-query">{{ t(placeholder_key) }}</label>
+    <input id="{{ anchor }}-query" type="search" name="{{ query_name }}" value="{{ page_data.query }}" placeholder="{{ t(placeholder_key) }}">
+    <button class="button button-secondary" type="submit">{{ t('common.search') }}</button>
+    {% if page_data.query %}<a class="text-link" href="{{ request.url.path }}#{{ anchor }}">{{ t('common.clear') }}</a>{% endif %}
+  </form>
+  <span class="list-count">{{ t('common.result_count', count=page_data.total) }}</span>
+</div>
+{% endmacro %}
+
+{% macro pagination(page_data, query_name, page_name, anchor) %}
+{% if page_data.page_count > 1 %}
+<nav class="pagination" aria-label="{{ t('pagination.label') }}">
+  <form method="get" action="{{ request.url.path }}#{{ anchor }}">
+    {% if page_data.query %}<input type="hidden" name="{{ query_name }}" value="{{ page_data.query }}">{% endif %}
+    <button class="button button-secondary" type="submit" name="{{ page_name }}" value="{{ page_data.page - 1 }}" {% if not page_data.has_previous %}disabled{% endif %}>{{ t('pagination.previous') }}</button>
+  </form>
+  <span aria-current="page">{{ t('pagination.position', page=page_data.page, pages=page_data.page_count) }}</span>
+  <form method="get" action="{{ request.url.path }}#{{ anchor }}">
+    {% if page_data.query %}<input type="hidden" name="{{ query_name }}" value="{{ page_data.query }}">{% endif %}
+    <button class="button button-secondary" type="submit" name="{{ page_name }}" value="{{ page_data.page + 1 }}" {% if not page_data.has_next %}disabled{% endif %}>{{ t('pagination.next') }}</button>
+  </form>
+</nav>
+{% endif %}
+{% endmacro %}

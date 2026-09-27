@@ -1,0 +1,62 @@
+<!doctype html>
+<html lang="{{ locale }}">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="icon" type="image/svg+xml" href="{{ url_for('static', path='/brand/favicon.svg') }}">
+    {% set localized_page_title = t(page_title_key) if page_title_key is defined else page_title %}
+    <title>{{ localized_page_title }} · {{ t('app.accessible_name') }}</title>
+    <link rel="stylesheet" href="{{ url_for('static', path='/styles.css') }}">
+    <script src="{{ url_for('static', path='/vendor/htmx.min.js') }}" defer></script>
+    <script id="ui-messages" type="application/json">{{ js_messages|tojson }}</script>
+    <script src="{{ url_for('static', path='/app.js') }}" defer></script>
+  </head>
+  <body>
+    <a class="skip-link" href="#main-content">{{ t('shell.skip_to_content') }}</a>
+    <div class="app-shell">
+      <aside class="sidebar">
+        <a class="brand" href="/market" aria-label="{{ t('app.accessible_name') }}">
+          <span class="brand-mark" aria-hidden="true"><img src="{{ url_for('static', path='/brand/logo-mark.svg') }}" width="32" height="32" alt=""></span>
+        </a>
+        {% if shell_roles %}
+        <form action="/roles/switch" method="post" class="sidebar-role-switcher" data-role-switch>
+          <input type="hidden" name="return_to" value="{{ request.url.path }}">
+          <label for="global-role-switcher">{{ t('shell.current_role') }}</label>
+          <input id="global-role-switcher" type="search" name="role_name" list="global-role-options" value="{{ shell_current_role.name }}" autocomplete="off" required aria-describedby="role-switch-help">
+          <datalist id="global-role-options">{% for role in shell_roles %}<option value="{{ role.name }}"></option>{% endfor %}</datalist>
+          <button class="button sidebar-switch-button" type="submit">{{ t('shell.role_switch') }}</button>
+          <small id="role-switch-help">{{ t('shell.role_switch_help') }}</small>
+        </form>
+        {% else %}
+        <a class="sidebar-role-empty" href="/settings">{{ t('role.create_first') }}</a>
+        {% endif %}
+        <nav class="primary-nav" aria-label="{{ t('nav.primary_label') }}">
+          {% for message_key, href, key in navigation|default([]) %}
+            <a class="nav-link{% if active_nav == key %} is-active{% endif %}" href="{{ href }}">
+              <span>{{ t(message_key) }}</span>
+            </a>
+          {% endfor %}
+        </nav>
+        <div class="locale-switcher" role="group" aria-label="{{ t('locale.selector_label') }}">
+          {% for locale_code, message_key in [('zh-CN', 'locale.zh-CN'), ('en', 'locale.en')] %}
+            <form action="/locale" method="post">
+              <input type="hidden" name="locale" value="{{ locale_code }}">
+              <input type="hidden" name="next" value="{{ locale_return_to }}">
+              <button type="submit" title="{{ t('locale.switch_title', language=t(message_key)) }}"{% if locale == locale_code %} class="is-current" aria-current="true"{% endif %}>{{ t(message_key) }}</button>
+            </form>
+            {% if not loop.last %}<span aria-hidden="true">|</span>{% endif %}
+          {% endfor %}
+        </div>
+        <div class="sidebar-note">
+          <span class="status-dot"></span>
+          {{ t('shell.local_workspace') }}
+        </div>
+      </aside>
+      <main id="main-content" class="main-content page-stack">
+        {% block page_heading %}<h1 class="sr-only">{{ localized_page_title }}</h1>{% endblock %}
+        {% include "partials/interaction_result.html" %}
+        {% block content %}{% endblock %}
+      </main>
+    </div>
+  </body>
+</html>

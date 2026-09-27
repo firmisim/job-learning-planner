@@ -1,0 +1,10 @@
+{% extends "base.html" %}
+{% block content %}
+  <section class="error-panel error-{{ error_category }}" role="alert">
+    <span class="badge badge-error">{{ t('error.category.' ~ error_category) }}</span>
+    <h2>{{ t('error.validation_title') if error_category == 'validation' else t('error.conflict_title') if error_category == 'conflict' else t('error.system_title') }}</h2>
+    <p>{{ localize(error_message) }}</p>
+    <p>{{ error_guidance }}</p>
+    <div class="button-row"><a class="button" href="{{ recovery_path }}">{{ t('error.return_refresh') }}</a><a class="button button-secondary" href="/settings">{{ t('error.open_status') }}</a></div>
+  </section>
+{% endblock %}

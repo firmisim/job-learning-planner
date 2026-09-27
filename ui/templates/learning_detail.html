@@ -1,0 +1,63 @@
+{% extends "base.html" %}
+{% block page_heading %}{% endblock %}
+{% block content %}
+  {% if error_message %}<div class="notice notice-error"><strong>{{ t('feedback.action_attention') }}</strong><span>{{ localize(error_message) }}</span></div>{% endif %}
+  <div class="object-heading"><div><p class="section-kicker">{{ t('nav.learning') }}</p><h1>{{ view.capability.name }}</h1><p>{{ t('learning.detail.help') }}</p></div><a class="text-link" href="/learning">{{ t('learning.back') }}</a></div>
+
+  <section class="panel" id="roadmap-scope">
+    <div class="section-heading"><div><h2>{{ t('learning.roadmap_scope.title') }}</h2><p class="muted">{{ t('learning.roadmap_scope.role_only') }}</p></div><span class="badge badge-{{ 'ready' if view.capability.included_in_roadmap else 'neutral' }}">{{ t('learning.roadmap_scope.included') if view.capability.included_in_roadmap else t('learning.roadmap_scope.excluded') }}</span></div>
+    <form class="form-stack" method="post" action="/learning/capabilities/{{ view.capability.capability_id }}/roadmap-scope">
+      <input type="hidden" name="role_id" value="{{ view.current_role.role_id }}">
+      <input type="hidden" name="expected_sha256" value="{{ view.roadmap_scope_sha256 or '' }}">
+      <div class="level-criteria-list criteria-comparison">
+        <label class="level-criterion {{ 'is-current' if view.capability.included_in_roadmap else '' }}"><input type="radio" name="included" value="true" required {{ 'checked' if view.capability.included_in_roadmap else '' }}><span><strong>{{ t('learning.roadmap_scope.included') }}</strong></span></label>
+        <label class="level-criterion {{ 'is-current' if not view.capability.included_in_roadmap else '' }}"><input type="radio" name="included" value="false" required {{ 'checked' if not view.capability.included_in_roadmap else '' }}><span><strong>{{ t('learning.roadmap_scope.excluded') }}</strong></span></label>
+      </div>
+      <small>{{ t('learning.roadmap_scope.preserve_help') }}</small>
+      <div class="button-row"><button class="button" type="submit">{{ t('learning.roadmap_scope.save') }}</button></div>
+    </form>
+  </section>
+
+  <section class="panel" id="level">
+    <div class="section-heading"><div><h2>{{ t('learning.current_level') }}</h2><p class="muted">{{ t('learning.criteria_specific') if view.criteria_source == 'capability-specific' else t('learning.criteria_generic') }}</p></div><span class="badge badge-{{ 'neutral' if view.capability.current_level is none else 'ready' }}">{% if view.capability.current_level is none %}{{ t('common.not_set') }}{% else %}{{ t('level.value', level=view.capability.current_level) }}{% endif %}</span></div>
+    <form class="form-stack" method="post" action="/learning/capabilities/{{ view.capability.capability_id }}/level">
+      <input type="hidden" name="role_id" value="{{ view.current_role.role_id }}">
+      <input type="hidden" name="expected_sha256" value="{{ view.personal_states_sha256 }}">
+      <div class="level-criteria-list criteria-comparison">
+        {% for criterion in view.level_criteria %}
+          <label class="level-criterion {{ 'is-current' if view.capability.current_level == criterion.level else '' }}">
+            <input type="radio" name="current_level" value="{{ criterion.level }}" required {{ 'checked' if view.capability.current_level == criterion.level else '' }}>
+            <span class="criterion-body"><span class="criterion-label"><strong>{{ t('level.number', level=criterion.level) }}</strong>{% if view.capability.current_level == criterion.level %}<small>{{ t('status.current') }}</small>{% endif %}</span><span>{{ criterion.text }}</span></span>
+          </label>
+        {% endfor %}
+      </div>
+      <div class="button-row"><button class="button" type="submit">{{ t('learning.save_level') }}</button></div>
+    </form>
+    <small>{{ t('learning.level_help') }}</small>
+  </section>
+
+  <div class="page-stack learning-detail-flow">
+    <section class="panel" id="practice">
+      <div class="section-heading"><div><h2>{{ t('practice.label') }}</h2><p>{{ t('practice.help') }}</p></div><span class="badge badge-neutral">{{ view.capability.practices|length }}</span></div>
+      <form class="form-stack reading-content" method="post" action="/learning/capabilities/{{ view.capability.capability_id }}/practices">
+        <input type="hidden" name="role_id" value="{{ view.current_role.role_id }}">
+        <input type="hidden" name="expected_sha256" value="{{ view.practices_sha256 }}">
+        <label>{{ t('common.description') }}<textarea name="description" rows="2" required placeholder="{{ t('practice.placeholder') }}"></textarea></label>
+        <button class="button button-secondary" type="submit">{{ t('practice.add') }}</button>
+      </form>
+      {% if view.capability.practices %}<div class="practice-list">{% for practice in view.capability.practices %}<details class="practice-entry"><summary>{{ practice.description|truncate(160, true, '…') }}</summary><p class="reading-content practice-description">{{ practice.description }}</p><form class="form-stack reading-content" method="post" action="/learning/capabilities/{{ view.capability.capability_id }}/practices/{{ practice.practice_id }}/edit"><input type="hidden" name="role_id" value="{{ view.current_role.role_id }}"><input type="hidden" name="expected_sha256" value="{{ view.practices_sha256 }}"><label>{{ t('common.description') }}<textarea name="description" rows="4">{{ practice.description }}</textarea></label><small>{{ t('practice.empty_removes') }}</small><button class="button button-secondary" type="submit">{{ t('practice.save') }}</button></form></details>{% endfor %}</div>{% else %}<div class="empty-state compact"><p>{{ t('practice.none') }}</p></div>{% endif %}
+    </section>
+
+    <section class="panel learning-knowledge" id="knowledge-summary">
+      <div class="section-heading"><div><h2>{{ t('knowledge.summary_title') }}</h2><p>{{ t('knowledge.summary_help') }}</p></div><span class="badge badge-{{ 'ready' if view.knowledge_status == 'available' else 'attention' }}">{{ t('knowledge.status.' ~ (view.knowledge_status or 'missing')) }}</span></div>
+      <div class="reading-content">
+      {% if view.core_topics %}<h3>{{ t('knowledge.core_topics') }}</h3><ul>{% for item in view.core_topics %}<li>{{ item }}</li>{% endfor %}</ul>{% endif %}
+      {% if view.prerequisites %}<details><summary>{{ t('knowledge.prerequisites') }}</summary><ul>{% for item in view.prerequisites %}<li>{{ item }}</li>{% endfor %}</ul></details>{% endif %}
+      {% if view.useful_practices %}<details><summary>{{ t('knowledge.practice_guidance') }}</summary><ul>{% for item in view.useful_practices %}<li>{{ item }}</li>{% endfor %}</ul></details>{% endif %}
+      {% if view.acceptance_criteria %}<details><summary>{{ t('knowledge.acceptance_criteria') }}</summary><ul>{% for item in view.acceptance_criteria %}<li>{{ item }}</li>{% endfor %}</ul></details>{% endif %}
+      {% if not view.core_topics %}<div class="empty-state compact"><p>{{ t('knowledge.research_context_help') }}</p></div>{% endif %}
+      </div>
+      <a class="button button-quiet" href="/capabilities/{{ view.capability.capability_id }}#knowledge">{{ t('knowledge.open_full') }}</a>
+    </section>
+  </div>
+{% endblock %}

@@ -1,0 +1,61 @@
+{% extends "base.html" %}
+{% block content %}
+  {% if error_message %}<div class="notice notice-error"><strong>{{ t('feedback.stopped_safely') }}</strong><span>{{ localize(error_message) }}</span></div>{% endif %}
+
+  <section class="panel">
+    <div class="section-heading"><div><p class="section-kicker">{{ t('role.plural') }}</p><h2>{{ t('settings.manage_roles') }}</h2><p>{{ t('settings.roles_help') }}</p></div><span class="badge badge-neutral">{{ view.role_count }}</span></div>
+    <div class="settings-create-role"><h3>{{ t('role.create') }}</h3>
+    <form action="/settings/roles" method="post" class="inline-form">
+      <input type="hidden" name="expected_sha256" value="{{ shell_roles_sha256 }}">
+      <label>{{ t('role.new_name') }}<input name="name" required></label>
+      <button class="button" type="submit">{{ t('role.create') }}</button>
+    </form>
+    </div>
+    {% if shell_roles %}
+      <div class="stack-list role-management-list">
+      {% for role in shell_roles %}
+        <article class="role-management-card">
+          <h3>{{ role.name }}</h3>
+          <div class="role-maintenance-forms">
+          <form action="/settings/roles/rename" method="post" class="inline-form">
+            <input type="hidden" name="role_id" value="{{ role.role_id }}">
+            <input type="hidden" name="expected_sha256" value="{{ shell_roles_sha256 }}">
+            <label>{{ t('role.name') }}<input name="name" value="{{ role.name }}" required></label>
+            <button class="button button-secondary" type="submit">{{ t('common.rename') }}</button>
+          </form>
+          <form action="/settings/roles/delete" method="post" class="inline-form role-delete-form" data-confirm="{{ t('role.delete_confirm') }}">
+            <input type="hidden" name="role_id" value="{{ role.role_id }}">
+            <input type="hidden" name="expected_sha256" value="{{ shell_roles_sha256 }}">
+            <label>{{ t('role.type_to_delete', name=role.name) }}<input name="confirmation" required autocomplete="off"></label>
+            <button class="button button-danger button-quiet" type="submit">{{ t('common.delete') }}</button>
+          </form>
+          </div>
+        </article>
+      {% endfor %}
+      </div>
+    {% endif %}
+  </section>
+
+  <section class="panel"><div class="section-heading"><div><p class="section-kicker">{{ t('common.status') }}</p><h2>{{ t('settings.data_ready') }}</h2></div><span class="badge badge-ready">{{ t('status.ready') }}</span></div>
+      <div class="metadata-line workspace-counts"><div><span>{{ t('role.plural') }}</span><strong>{{ view.role_count }}</strong></div><div><span>{{ t('capability.plural') }}</span><strong>{{ view.capability_count }}</strong></div><div><span>{{ t('knowledge.label') }}</span><strong>{{ view.knowledge_count }}</strong></div><div><span>{{ t('roadmap.plural') }}</span><strong>{{ view.roadmap_count }}</strong></div></div>
+  </section>
+
+  <details class="panel secondary-panel settings-disclosure danger-zone" {% if view.reset_manifest_json %}open{% endif %}>
+    <summary><div><strong>{{ t('settings.reset_title') }}</strong><span>{{ t('settings.reset_summary') }}</span></div><span class="badge badge-attention">{{ t('settings.explicit_only') }}</span></summary>
+    <div class="settings-disclosure-content">
+      <p>{{ t('settings.reset_help') }}</p>
+      {% if not view.reset_manifest_json %}
+        <form action="/settings/development-reset/preview" method="post"><button class="button button-secondary" type="submit">{{ t('settings.preview_reset') }}</button></form>
+      {% else %}
+        <p><strong>{{ t('settings.reset_confirmation') }}</strong> <code>{{ view.reset_id }}</code></p>
+        <p>{{ t('settings.reset_file_count', count=view.reset_targets|length) }}</p>
+        <form action="/settings/development-reset/apply" method="post" class="form-stack" data-confirm="{{ t('settings.reset_confirm') }}">
+          <input type="hidden" name="manifest_json" value="{{ view.reset_manifest_json|e }}">
+          <label>{{ t('settings.type_reset_id') }}<input name="confirmation" required autocomplete="off"></label>
+          <label>{{ t('settings.type_risk_phrase') }}<input name="risk_confirmation" required autocomplete="off"></label>
+          <button class="button button-danger" type="submit">{{ t('settings.reset_all') }}</button>
+        </form>
+      {% endif %}
+    </div>
+  </details>
+{% endblock %}
