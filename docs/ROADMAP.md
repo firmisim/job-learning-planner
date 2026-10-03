@@ -1,5 +1,15 @@
 # Product Roadmap
 
+## v2.3.1 — User Feedback Maintenance
+
+**Complete.**
+
+- Role switching now presents its actual localized success result instead of an ambiguous hidden-detail fallback.
+- Unknown Web-safe operation results preserve their concrete user-facing reason rather than being replaced by generic retry guidance.
+- Validation, conflict and local-system failures explain why the operation stopped and whether a change was applied.
+- Release-state documentation reflects the public repository and preserves `v2.3.0` as the first public release.
+- The full local test suite is green.
+
 ## v2.3.0 — First Public Release
 
 **Complete.**

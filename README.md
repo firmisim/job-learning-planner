@@ -15,8 +15,9 @@ retain decisions such as Add, Merge, Skip, personal Level, Practice, and Roadmap
 Scope. The application does not call a remote language-model API in the
 background. The interface supports `zh-CN` and English.
 
-This is the public source tree for `v2.3.0`, the first public release, in
-[`firmisim/job-learning-planner`](https://github.com/firmisim/job-learning-planner).
+This is the public source tree for `v2.3.1`, the current maintenance release,
+in [`firmisim/job-learning-planner`](https://github.com/firmisim/job-learning-planner).
+`v2.3.0` remains the first public release.
 
 ## Why this exists
 

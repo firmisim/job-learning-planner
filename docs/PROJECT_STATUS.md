@@ -3,11 +3,12 @@
 ## Current Snapshot
 
 - Snapshot date: 2026-10-03.
-- Current version: **v2.3.0 — First Public Release, published**.
+- Current version: **v2.3.1 — User Feedback Maintenance**.
 - Public repository: **`firmisim/job-learning-planner`**, default branch `main`.
-- Human Final Release Acceptance: **PASS**.
+- v2.3.1 corrects user-facing success/error feedback and synchronizes release-state documentation; the full local test suite is green.
+- v2.3.0 remains the first public release and its Human Final Release Acceptance is **PASS**.
 - Public-0 through Public-3: **COMPLETE**.
-- The clean public snapshot, initial public commit, `v2.3.0` tag and **Job Learning Planner v2.3.0 — First Public Release** are published.
+- The clean public snapshot, initial public commit, `v2.3.0` tag and **Job Learning Planner v2.3.0 — First Public Release** remain published as release history.
 - GitHub Actions is green on Windows and Ubuntu with Python 3.11 and 3.14, including runtime startup and the full test suite.
 - There is no active implementation stage, release operation, Public-4, Stage 3 or v2.4 plan.
 - Next work requires a separately authorized delta; completed release work is not an active Roadmap item.
