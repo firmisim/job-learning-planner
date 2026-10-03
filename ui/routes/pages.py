@@ -161,7 +161,7 @@ def locale_switch(
         raise ApplicationError(
             "validation",
             "switch UI locale",
-            translate_request(request, "locale.invalid"),
+            "界面语言不受支持",
         )
     response = RedirectResponse(_safe_locale_return_path(next), status_code=303)
     response.set_cookie(
@@ -199,7 +199,7 @@ def role_switch(
     selected = _market(request).resolve_role_name(role_name)
     return _redirect_to(
         return_to,
-        translate_request(request, "feedback.role_switched"),
+        "当前 Role 已切换",
         role_id=str(selected),
     )
 

@@ -15,9 +15,8 @@ retain decisions such as Add, Merge, Skip, personal Level, Practice, and Roadmap
 Scope. The application does not call a remote language-model API in the
 background. The interface supports `zh-CN` and English.
 
-This source tree is the release candidate for the first public version,
-`v2.3.0`, under the future repository name
-`firmisim/job-learning-planner`.
+This is the public source tree for `v2.3.0`, the first public release, in
+[`firmisim/job-learning-planner`](https://github.com/firmisim/job-learning-planner).
 
 ## Why this exists
 
@@ -43,7 +42,7 @@ ranking engine.
 
 - Python 3.11 or newer
 - A modern desktop browser
-- Windows is the currently tested operating system for this release candidate
+- Windows is the currently end-to-end tested operating system for this release
 - Codex is the reference and currently end-to-end tested Agent environment
 
 Other operating systems and other Agent Skills-compatible products may work,

@@ -152,6 +152,8 @@ _SYSTEM_MESSAGE_KEYS = {
     "Map at least one Capability": "roadmap.blocker.map_capability",
     "Include at least one Capability in Roadmap": "roadmap.blocker.include_capability",
     "Create a Role": "roadmap.blocker.create_role",
+    "界面语言不受支持": "locale.invalid",
+    "当前 Role 已切换": "feedback.role_switched",
     "Role 不存在": "message.role_missing",
     "Capability 不存在": "message.capability_missing",
     "Capability 不属于当前 Role": "message.capability_not_in_role",
@@ -319,7 +321,11 @@ def localize_system_message(
         match = pattern.fullmatch(message)
         if match is not None:
             return catalog.translate(locale, pattern_key, **match.groupdict())
-    return catalog.translate(locale, "message.detail_unavailable")
+    # ApplicationError.public_message and redirect notices are explicitly the
+    # Web-safe boundary. If a new message has not been added to the translation
+    # table yet, preserve its concrete reason instead of replacing it with an
+    # ambiguous retry instruction that can misrepresent a successful action.
+    return message
 
 
 def localize_request_message(request: Request, message: str | None) -> str | None:

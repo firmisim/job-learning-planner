@@ -2,15 +2,15 @@
 
 ## Current Snapshot
 
-- Snapshot date: 2026-09-27.
-- Current version: **v2.3 — Complete**.
-- Release target: **v2.3.0 — First Public Release**.
+- Snapshot date: 2026-10-03.
+- Current version: **v2.3.0 — First Public Release, published**.
+- Public repository: **`firmisim/job-learning-planner`**, default branch `main`.
 - Human Final Release Acceptance: **PASS**.
 - Public-0 through Public-3: **COMPLETE**.
-- Public release preparation and clean-room validation are complete. The current private source is the verified public release candidate.
+- The clean public snapshot, initial public commit, `v2.3.0` tag and **Job Learning Planner v2.3.0 — First Public Release** are published.
 - GitHub Actions is green on Windows and Ubuntu with Python 3.11 and 3.14, including runtime startup and the full test suite.
-- There is no active implementation stage, Public-4, Stage 3 or v2.4 plan.
-- Next: **Clean Public Release Operation** — export the final private HEAD as a clean snapshot, create and verify `firmisim/job-learning-planner`, then publish `v2.3.0`.
+- There is no active implementation stage, release operation, Public-4, Stage 3 or v2.4 plan.
+- Next work requires a separately authorized delta; completed release work is not an active Roadmap item.
 
 ## Product and Workflow
 
@@ -50,4 +50,4 @@ Real JD → Capability-grade Market Signal → Capability
 - Native browser controls such as the file chooser may follow browser/OS language.
 - Compatibility with non-Codex Agent environments remains experimental until independently verified end to end.
 
-The current architecture is defined in [ARCHITECTURE.md](ARCHITECTURE.md), durable constraints in [DECISIONS.md](DECISIONS.md), and the release operation in [ROADMAP.md](ROADMAP.md).
+The current architecture is defined in [ARCHITECTURE.md](ARCHITECTURE.md), durable constraints in [DECISIONS.md](DECISIONS.md), and active future planning status in [ROADMAP.md](ROADMAP.md).

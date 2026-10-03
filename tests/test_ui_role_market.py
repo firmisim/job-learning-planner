@@ -38,6 +38,9 @@ def test_role_create_switch_rename_delete_ui_and_role_scoping(tmp_path: Path) ->
     client.post("/market/jobs", data={"role_id": role_b, "title": "Java JD", "company": "", "source_url": "", "jd_text": "Spring Boot", "expected_sha256": view_b.jds_sha256})
     switched = client.post("/roles/switch", data={"role_name": "AI 应用开发"}, follow_redirects=False)
     assert switched.status_code == 303
+    switch_notice = client.get(switched.headers["location"])
+    assert "Current Role switched" in switch_notice.text
+    assert "technical detail that is not shown here" not in switch_notice.text
     client.cookies.set("job_learning_current_role", role_a)
     page_a = client.get("/market")
     assert "AI 应用开发" in page_a.text

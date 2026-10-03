@@ -102,9 +102,54 @@ def test_all_static_template_keys_exist_and_system_messages_localize() -> None:
     assert localize_system_message(catalog, "zh-CN", "Role “English Role” 已创建") == (
         "Role“English Role”已创建"
     )
-    assert localize_system_message(catalog, "en", "unknown internal detail") == (
-        catalog.translate("en", "message.detail_unavailable")
+    assert localize_system_message(catalog, "en", "safe public reason") == (
+        "safe public reason"
     )
+
+
+@pytest.mark.parametrize(
+    ("locale", "expected"),
+    [
+        ("zh-CN", "已切换当前 Role"),
+        ("en", "Current Role switched"),
+    ],
+)
+def test_role_switch_success_keeps_a_specific_localized_notice(
+    tmp_path: Path, locale: str, expected: str
+) -> None:
+    client = TestClient(
+        create_app(tmp_path / locale / "state"),
+        headers={"Accept-Language": locale},
+    )
+    market = client.app.state.market
+    role_id, _ = market.create_role("Target Role", market.view().roles_sha256)
+
+    response = client.post(
+        "/roles/switch",
+        data={"role_name": "Target Role", "return_to": "/market"},
+    )
+
+    assert response.status_code == 200
+    assert expected in response.text
+    assert client.cookies.get("job_learning_current_role") == role_id
+    assert "此处不展示的技术详情" not in response.text
+    assert "technical detail that is not shown here" not in response.text
+
+
+def test_validation_error_shows_reason_and_explains_why_change_stopped(
+    tmp_path: Path,
+) -> None:
+    client = TestClient(
+        create_app(tmp_path / "state"), headers={"Accept-Language": "zh-CN"}
+    )
+
+    response = client.post("/locale", data={"locale": "unsupported"})
+
+    assert response.status_code == 422
+    assert "不支持所选界面语言" in response.text
+    assert "系统没有执行这项更改" in response.text
+    assert "请检查操作" not in response.text
+    assert "此处不展示的技术详情" not in response.text
 
 
 @pytest.mark.parametrize(
@@ -139,16 +184,17 @@ def test_application_batch_messages_localize_with_exact_handoff_guidance(
         )
         next_message = operations.prepare_next_capability_analysis_batch_request()
 
-    fallback = catalog.translate(locale, "message.detail_unavailable")
     localized = localize_system_message(catalog, locale, message)
     localized_next = localize_system_message(catalog, locale, next_message)
     assert localized is not None
     assert localized_next is not None
     assert summary in localized
     assert skill in localized
-    assert fallback not in localized
+    assert "technical detail that is not shown here" not in localized
+    assert "此处不展示的技术详情" not in localized
     assert skill in localized_next
-    assert fallback not in localized_next
+    assert "technical detail that is not shown here" not in localized_next
+    assert "此处不展示的技术详情" not in localized_next
     assert ("第 1 /" in localized_next) if locale == "zh-CN" else (
         "Batch 1 of" in localized_next
     )
@@ -294,10 +340,11 @@ def test_locale_role_and_mixed_language_content_are_independent(
     )
     assert switched_role.status_code == 303
     assert client.cookies.get(LOCALE_COOKIE) == "en"
-    assert "Current+Role+switched" in switched_role.headers["location"]
-    english_role_page = client.get("/market")
+    english_role_page = client.get(switched_role.headers["location"])
     assert '<html lang="en">' in english_role_page.text
     assert "API Engineering JD" in english_role_page.text
+    assert "Current Role switched" in english_role_page.text
+    assert "technical detail that is not shown here" not in english_role_page.text
 
     client.post(
         "/locale",
