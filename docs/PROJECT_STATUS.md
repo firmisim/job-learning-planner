@@ -5,9 +5,9 @@
 - Snapshot date: 2026-10-08.
 - Current version: **v2.3.2 — Knowledge and Roadmap Quality Maintenance**.
 - Public repository: **`firmisim/job-learning-planner`**, default branch `main`.
-- v2.3.2 release tagging and publication remain pending. The latest local release tag is `v2.3.1`.
+- **v2.3.2** is the latest release, published from `main` with its matching Git tag and GitHub Release.
 - Knowledge Research explains capability mechanisms, progression, connected practice and checkable criteria. Roadmap guidance includes small starting tasks, reading entries, stage checks and bounded source consultation. Contracts are defined in [Architecture](ARCHITECTURE.md#knowledge-and-personal-learning) and the referenced Skills.
-- No new product implementation stage is active. Remaining release work and ongoing learner-feedback needs are in [Roadmap](ROADMAP.md).
+- No new product implementation stage is active. Ongoing learner-feedback needs are in [Roadmap](ROADMAP.md).
 
 ## Implemented Product Surface
 
