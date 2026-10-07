@@ -615,8 +615,8 @@ def learning_practice_edit(
     capability_id: str,
     practice_id: str,
     role_id: Annotated[str, Form()],
-    description: Annotated[str, Form()],
     expected_sha256: Annotated[str, Form()],
+    description: Annotated[str, Form()] = "",
 ) -> Response:
     try:
         role_id = _current_learning_role(request, role_id)

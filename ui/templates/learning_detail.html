@@ -2,21 +2,26 @@
 {% block page_heading %}{% endblock %}
 {% block content %}
   {% if error_message %}<div class="notice notice-error"><strong>{{ t('feedback.action_attention') }}</strong><span>{{ localize(error_message) }}</span></div>{% endif %}
-  <div class="object-heading"><div><p class="section-kicker">{{ t('nav.learning') }}</p><h1>{{ view.capability.name }}</h1><p>{{ t('learning.detail.help') }}</p></div><a class="text-link" href="/learning">{{ t('learning.back') }}</a></div>
-
-  <section class="panel" id="roadmap-scope">
-    <div class="section-heading"><div><h2>{{ t('learning.roadmap_scope.title') }}</h2><p class="muted">{{ t('learning.roadmap_scope.role_only') }}</p></div><span class="badge badge-{{ 'ready' if view.capability.included_in_roadmap else 'neutral' }}">{{ t('learning.roadmap_scope.included') if view.capability.included_in_roadmap else t('learning.roadmap_scope.excluded') }}</span></div>
-    <form class="form-stack" method="post" action="/learning/capabilities/{{ view.capability.capability_id }}/roadmap-scope">
-      <input type="hidden" name="role_id" value="{{ view.current_role.role_id }}">
-      <input type="hidden" name="expected_sha256" value="{{ view.roadmap_scope_sha256 or '' }}">
-      <div class="level-criteria-list criteria-comparison">
-        <label class="level-criterion {{ 'is-current' if view.capability.included_in_roadmap else '' }}"><input type="radio" name="included" value="true" required {{ 'checked' if view.capability.included_in_roadmap else '' }}><span><strong>{{ t('learning.roadmap_scope.included') }}</strong></span></label>
-        <label class="level-criterion {{ 'is-current' if not view.capability.included_in_roadmap else '' }}"><input type="radio" name="included" value="false" required {{ 'checked' if not view.capability.included_in_roadmap else '' }}><span><strong>{{ t('learning.roadmap_scope.excluded') }}</strong></span></label>
-      </div>
-      <small>{{ t('learning.roadmap_scope.preserve_help') }}</small>
-      <div class="button-row"><button class="button" type="submit">{{ t('learning.roadmap_scope.save') }}</button></div>
-    </form>
-  </section>
+  <div class="object-heading learning-detail-heading">
+    <div class="learning-detail-title"><p class="section-kicker">{{ t('nav.learning') }}</p><h1>{{ view.capability.name }}</h1><p>{{ t('learning.detail.help') }}</p></div>
+    <a class="text-link learning-detail-back" href="/learning">{{ t('learning.back') }}</a>
+    <div class="roadmap-scope-control">
+      <form class="roadmap-scope-form" method="post" action="/learning/capabilities/{{ view.capability.capability_id }}/roadmap-scope">
+        <input type="hidden" name="role_id" value="{{ view.current_role.role_id }}">
+        <input type="hidden" name="expected_sha256" value="{{ view.roadmap_scope_sha256 or '' }}">
+        <input type="hidden" name="included" value="{{ 'false' if view.capability.included_in_roadmap else 'true' }}">
+        <button
+          class="roadmap-scope-toggle {{ 'is-included' if view.capability.included_in_roadmap else 'is-excluded' }}"
+          type="submit"
+          role="switch"
+          aria-checked="{{ 'true' if view.capability.included_in_roadmap else 'false' }}"
+          aria-describedby="roadmap-scope-help"
+          aria-label="{{ t('learning.roadmap_scope.toggle_to_excluded') if view.capability.included_in_roadmap else t('learning.roadmap_scope.toggle_to_included') }}"
+        ><span class="badge badge-{{ 'ready' if view.capability.included_in_roadmap else 'neutral' }}">{{ t('learning.roadmap_scope.included') if view.capability.included_in_roadmap else t('learning.roadmap_scope.excluded') }}</span></button>
+      </form>
+      <div class="roadmap-scope-tooltip" id="roadmap-scope-help" role="tooltip">{{ t('learning.roadmap_scope.role_only') }} {{ t('learning.roadmap_scope.preserve_help') }}</div>
+    </div>
+  </div>
 
   <section class="panel" id="level">
     <div class="section-heading"><div><h2>{{ t('learning.current_level') }}</h2><p class="muted">{{ t('learning.criteria_specific') if view.criteria_source == 'capability-specific' else t('learning.criteria_generic') }}</p></div><span class="badge badge-{{ 'neutral' if view.capability.current_level is none else 'ready' }}">{% if view.capability.current_level is none %}{{ t('common.not_set') }}{% else %}{{ t('level.value', level=view.capability.current_level) }}{% endif %}</span></div>
@@ -45,7 +50,7 @@
         <label>{{ t('common.description') }}<textarea name="description" rows="2" required placeholder="{{ t('practice.placeholder') }}"></textarea></label>
         <button class="button button-secondary" type="submit">{{ t('practice.add') }}</button>
       </form>
-      {% if view.capability.practices %}<div class="practice-list">{% for practice in view.capability.practices %}<details class="practice-entry"><summary>{{ practice.description|truncate(160, true, '…') }}</summary><p class="reading-content practice-description">{{ practice.description }}</p><form class="form-stack reading-content" method="post" action="/learning/capabilities/{{ view.capability.capability_id }}/practices/{{ practice.practice_id }}/edit"><input type="hidden" name="role_id" value="{{ view.current_role.role_id }}"><input type="hidden" name="expected_sha256" value="{{ view.practices_sha256 }}"><label>{{ t('common.description') }}<textarea name="description" rows="4">{{ practice.description }}</textarea></label><small>{{ t('practice.empty_removes') }}</small><button class="button button-secondary" type="submit">{{ t('practice.save') }}</button></form></details>{% endfor %}</div>{% else %}<div class="empty-state compact"><p>{{ t('practice.none') }}</p></div>{% endif %}
+      {% if view.capability.practices %}<div class="practice-list">{% for practice in view.capability.practices %}<details class="practice-entry"><summary><span class="practice-summary-preview">{{ practice.description|truncate(160, true, '…') }}</span><span class="practice-summary-edit">{{ t('practice.edit') }}</span></summary><form class="form-stack reading-content" method="post" action="/learning/capabilities/{{ view.capability.capability_id }}/practices/{{ practice.practice_id }}/edit"><input type="hidden" name="role_id" value="{{ view.current_role.role_id }}"><input type="hidden" name="expected_sha256" value="{{ view.practices_sha256 }}"><label>{{ t('common.description') }}<textarea name="description" rows="4">{{ practice.description }}</textarea></label><small>{{ t('practice.empty_removes') }}</small><button class="button button-secondary" type="submit">{{ t('practice.save') }}</button></form></details>{% endfor %}</div>{% else %}<div class="empty-state compact"><p>{{ t('practice.none') }}</p></div>{% endif %}
     </section>
 
     <section class="panel learning-knowledge" id="knowledge-summary">

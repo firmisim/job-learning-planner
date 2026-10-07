@@ -107,6 +107,19 @@ project runtime only: it does not reset persisted application state such as
 Roles, JDs, Capabilities, Capability Knowledge, Levels, Practices, Roadmap
 Scope, or Roadmaps.
 
+## Open the project in Agent
+
+For the complete Agent Skill workflow, add the downloaded or cloned repository
+root as a local Codex project and create a conversation in that project. Use the
+folder that contains `README.md`, `.agents/`, `scripts/`, and `state/`, and start
+Job Learning Planner from that same physical repository copy.
+
+Each repository copy has its own project Skills and local `state/`. Do not run
+the application from one copy while invoking Skills from another. A general
+workspace that is not rooted in this repository may not discover these Skills;
+before preparing the first Agent request, confirm that the four project Skills
+listed below are available in the Codex project.
+
 ## First use in the application
 
 After the application is running:
@@ -144,8 +157,8 @@ The repository provides task specifications and workflow instructions as Agent
 Skills; an Agent environment executes them. Codex is the reference environment
 currently verified end to end.
 
-In Codex, open this repository so its project Skills can be discovered, then
-explicitly ask Codex to use the prepared Skill—for example,
+From a conversation in this Codex project, explicitly ask Codex to use the
+prepared Skill—for example,
 `Use $jd-analysis for the request prepared by the app.` Return to the relevant
 page after the run completes. The UI and Skill handle the validated handoff;
 you should not move or edit internal JSON files.

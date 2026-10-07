@@ -282,6 +282,15 @@ input:focus, textarea:focus, select:focus { outline: 3px solid var(--accent); ou
 .level-criterion > span { display: grid; gap: var(--space-1); }
 .level-criterion small { color: var(--accent); font-weight: 700; }
 .object-heading { display: flex; align-items: flex-start; justify-content: space-between; gap: var(--space-4); margin-bottom: var(--space-4); }
+.learning-detail-heading { display: grid; grid-template-columns: minmax(0, 1fr) auto; grid-template-areas: "title back" "title scope"; align-items: start; column-gap: var(--space-5); row-gap: var(--space-3); }
+.learning-detail-title { grid-area: title; }
+.learning-detail-back { grid-area: back; justify-self: end; }
+.roadmap-scope-control { position: relative; grid-area: scope; justify-self: end; }
+.roadmap-scope-form { margin: 0; }
+.roadmap-scope-toggle { display: inline-flex; align-items: center; justify-content: center; min-height: var(--control-height); padding: var(--space-1); border: 0; border-radius: 999px; background: transparent; font: inherit; cursor: pointer; }
+.roadmap-scope-toggle:hover .badge { filter: brightness(.96); }
+.roadmap-scope-tooltip { position: absolute; z-index: 5; top: calc(100% + var(--space-2)); right: 0; width: max-content; max-width: min(28rem, calc(100vw - (2 * var(--space-4)))); padding: var(--space-2) var(--space-3); border: 1px solid #33414a; border-radius: var(--radius-control); background: var(--text); color: var(--surface); font-size: var(--text-helper); line-height: 1.5; text-align: left; opacity: 0; visibility: hidden; pointer-events: none; transform: translateY(-2px); transition: opacity .12s ease, transform .12s ease, visibility .12s ease; }
+.roadmap-scope-control:hover .roadmap-scope-tooltip, .roadmap-scope-control:focus-within .roadmap-scope-tooltip { opacity: 1; visibility: visible; transform: translateY(0); }
 .knowledge-level-criteria { margin: var(--space-4) 0; padding: var(--space-4); border-radius: var(--radius); background: var(--surface-muted); }
 .knowledge-level-criteria li { margin-bottom: var(--space-2); }
 .practice-list { margin-top: var(--space-4); }
@@ -400,7 +409,10 @@ summary { cursor: pointer; }
 .criterion-label { display: grid; align-content: start; gap: var(--space-1); }
 .practice-entry { padding: var(--space-4) 0; border-top: 1px solid var(--line); }
 .practice-entry > summary { max-width: var(--reading-width); font-weight: 500; }
-.practice-entry > .practice-description { margin: var(--space-4) 0; white-space: pre-wrap; }
+.practice-summary-edit { display: none; color: var(--accent); font-weight: 600; }
+.practice-entry[open] > summary .practice-summary-preview { display: none; }
+.practice-entry[open] > summary .practice-summary-edit { display: inline; }
+.practice-entry > form { margin-top: var(--space-4); }
 .learning-knowledge .reading-content > details { margin-block: var(--space-4); }
 .learning-knowledge .reading-content > details > summary { font-weight: 600; }
 
@@ -460,6 +472,9 @@ summary { cursor: pointer; }
   .summary-strip > div:last-child { border-bottom: 0; }
   .hero-panel, .next-action { align-items: flex-start; flex-direction: column; }
   .page-header { align-items: flex-start; gap: var(--space-4); }
+  .learning-detail-heading { grid-template-columns: minmax(0, 1fr); grid-template-areas: "title" "back" "scope"; }
+  .learning-detail-back, .roadmap-scope-control { justify-self: start; }
+  .roadmap-scope-tooltip { right: auto; left: 0; }
   .inline-form, .form-actions, .finalize-panel { align-items: stretch; flex-direction: column; }
   .input-task-grid, .compact-card-grid, .inbox-primary-layout { grid-template-columns: 1fr; }
   .list-controls, .list-search { align-items: stretch; flex-direction: column; }

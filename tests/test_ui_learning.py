@@ -75,8 +75,10 @@ def test_practice_add_edit_empty_remove_is_available_and_shared(tmp_path: Path) 
     assert added.status_code == 303
     page = client.get(f'/learning/capabilities/{ids["Docker"]}')
     assert "Save Practice" in page.text
+    assert "Edit Practice" in page.text
     assert "Saving an empty description removes this Practice" in page.text
     assert "Delete Practice" not in page.text
+    assert page.text.count("完成 Docker Compose 多服务项目") == 2
     practice = client.app.state.learning.storage.load_practices().practices[0]
 
     client.post(
@@ -103,7 +105,7 @@ def test_practice_add_edit_empty_remove_is_available_and_shared(tmp_path: Path) 
         f'/learning/capabilities/{ids["Docker"]}/practices/{practice.practice_id}/edit',
         data={
             "role_id": role_b,
-            "description": "  ",
+            "description": "",
             "expected_sha256": current.practices_sha256,
         },
         follow_redirects=False,
@@ -218,7 +220,14 @@ def test_roadmap_scope_detail_edit_list_status_and_role_specific_display(
     assert "In Roadmap" in listing.text
     detail = client.get(f'/learning/capabilities/{ids["Docker"]}')
     assert detail.status_code == 200
-    assert "Include in Roadmap" in detail.text
+    assert 'role="switch"' in detail.text
+    assert 'aria-checked="true"' in detail.text
+    assert 'aria-describedby="roadmap-scope-help"' in detail.text
+    assert 'name="included" value="false"' in detail.text
+    assert 'class="badge badge-ready"' in detail.text
+    assert 'role="tooltip"' in detail.text
+    assert "roadmap-scope-track" not in detail.text
+    assert "In Roadmap" in detail.text
     assert "Applies to this Role only." in detail.text
     assert "does not remove its Mapping, Knowledge, level, Practices, or market data" in detail.text
 
@@ -233,6 +242,9 @@ def test_roadmap_scope_detail_edit_list_status_and_role_specific_display(
     )
     assert excluded.status_code == 200
     assert "Excluded from future Roadmaps for the current Role" in excluded.text
+    assert 'aria-checked="false"' in excluded.text
+    assert 'name="included" value="true"' in excluded.text
+    assert 'class="badge badge-neutral"' in excluded.text
     listing = client.get("/learning")
     assert "Docker" in listing.text
     assert "Excluded from Roadmap" in listing.text
@@ -275,7 +287,8 @@ def test_roadmap_scope_ui_is_localized_in_zh_cn(tmp_path: Path) -> None:
     client.cookies.set("job_learning_current_role", role_a)
     detail = client.get(f'/learning/capabilities/{ids["Python"]}')
     assert detail.status_code == 200
-    assert "纳入学习路线" in detail.text
+    assert "已纳入学习路线" in detail.text
+    assert "点击切换为未纳入学习路线" in detail.text
     assert "仅适用于当前岗位方向。" in detail.text
     assert "不会移除其映射、知识、等级、实践或市场数据" in detail.text
 
