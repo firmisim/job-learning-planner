@@ -29,8 +29,19 @@ Use the highest available tier that directly supports the claim:
 
 ## Research depth
 
-Use the Capability canonical name to choose a minimum sufficient boundary.
-Cover the smallest coherent learning structure that enables useful practice
-and an acceptance judgment. Defer internals, adjacent platforms, and advanced
-operations unless they are intrinsic to the Capability itself. Role-specific
-priority and learning depth belong to Roadmap generation, not global Knowledge.
+Use the Capability canonical name to choose a bounded professional learning
+unit. Bounded scope does not mean shallow explanations: research the essential
+mechanisms, distinctions, representative situations, common failures and
+checking methods needed to understand and apply that unit. Follow specific
+sections or focused pages when an overview only names the concepts. Prefer
+direct section links when available so learners can locate the supporting
+material.
+
+Defer unrelated internals, adjacent platforms and specialized operations.
+Include intrinsic advanced mechanisms and trade-offs when the Level 4–5
+criteria depend on them; an advanced label cannot substitute for supported
+content. Explain within-Capability foundations and extensions without turning
+them into a cross-Capability dependency model. Role-specific priority, personal
+sequence and chosen learning depth belong to Roadmap generation. Knowledge
+must supply enough reusable substance for those choices, without becoming a
+full textbook or a personalized curriculum.

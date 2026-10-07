@@ -51,7 +51,6 @@ def create_app(storage_root: Path | None = None) -> FastAPI:
     resolved_root = (storage_root or DEFAULT_STORAGE_ROOT).resolve()
     app = FastAPI(
         title="Job Learning Planner",
-        version="3.0.0-clean-rebuild",
         docs_url=None,
         redoc_url=None,
     )

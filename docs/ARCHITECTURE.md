@@ -40,7 +40,7 @@ business files directly.
 | Practice | Non-empty work the user actually completed | Global per Capability |
 | SkippedCandidate | Suppress one current Role candidate until restore or source change | Role-specific current fact |
 | RoadmapScope | Explicit excluded Capability UUIDs; absence means all Included | Optional Role-specific current preference |
-| RoadmapVersion | Generated Markdown and complete-input fingerprint | Role-specific, immutable while retained, maximum 30 |
+| RoadmapVersion | Generated Markdown and prepared-input fingerprint | Role-specific, immutable while retained, maximum 30 |
 | Semantic handoff / batch manifest / Recommendation | Connect explicit Agent Skill work to validated application entry points | Replaceable execution intermediate |
 
 Working sets, pending candidates, readiness, freshness, latest status, input match, missing counts and batch progress are derived rather than persisted as duplicate truth.
@@ -81,6 +81,8 @@ Capability Analysis prepares selected or all current-Role candidates without Rec
 
 CapabilityKnowledge is one source-backed replaceable asset per Capability. Every item references known sources. Capability-specific level criteria, when present, contain all six observable Level 0–5 entries; generic criteria remain the fallback.
 
+The Knowledge Research Skill explains the Capability's boundary, essential mechanisms and internal progression within the existing text fields. Practice directions and checkable acceptance criteria connect to those explanations, and all six generated level descriptions stay within the supported content. The Skill owns instructional review; schema validation does not establish teaching quality. Detailed content requirements live in [the Skill](../.agents/skills/capability-knowledge-research/SKILL.md). This does not add fields, a dependency store or an automatic rewrite of existing Knowledge.
+
 Single Research and Refresh share the same validator and atomic replacement boundary. Initial batch Research processes fixed groups of four, validates and persists each Capability independently, supports partial success and retries failed items that remain eligible, and has no batch history or Bulk Refresh.
 
 My Learning joins the current Role working set to global Knowledge, PersonalCapabilityState and Practice. It also reads and edits the current Role's explicit Roadmap Scope exclusions while keeping excluded Capabilities visible. Unset level differs from Level 0. Practice and level never update each other automatically; an empty Practice edit removes that exact record.
@@ -95,6 +97,10 @@ guidance, mastery/acceptance criteria or other structured learning
 recommendations.
 
 A mapped Capability with available Knowledge may receive complete guidance. Missing Knowledge does not block generation: a research-needed item may use supplied name, Market relevance, current level and actual Practices, state the missing research boundary and recommend Research, but cannot invent prerequisites, topics, projects or mastery criteria.
+
+Roadmap synthesis gives immediate learning work small starting tasks, reading entries and observable completion/advance checks, while later work stays coarse or conditional. For available Knowledge, the Skill may consult its listed sources and directly linked official material to clarify task details within already supported topics. It records consulted titles, sections, URLs, dates and material version conditions in immutable Roadmap content. It does not perform open-ended research, fill missing Knowledge, change personal facts or expand Scope. Unresolved source conflicts and unavailable detail are disclosed; reusable Knowledge changes still use Research/Refresh. Detailed rules live in [the Roadmap Skill](../.agents/skills/job-learning-roadmap/SKILL.md).
+
+The input fingerprint covers prepared business facts only, not live webpage content. Matching inputs do not establish identical external evidence, and webpage changes do not automatically mark a Roadmap stale. There is no source-snapshot store; consultation evidence is recorded only in Roadmap content.
 
 Generation requires current analyzed Market input, a resolved Inbox and at
 least one effective selected mapped Capability. Scope is applied before
@@ -131,6 +137,8 @@ state/
 ```
 
 Mutable documents use schema and reference validation, expected SHA-256 stale checks and atomic replacement. Multi-file destructive operations prevalidate every target and use the existing atomic file-set boundary. Roadmap creation is exclusive and retained content is never overwritten. Development Reset requires an exact preview, matching authorization and target revalidation; startup never mutates user data.
+
+Current facts are correctable through validated Application/UI operations: SourceMapping supports Unmap/Reassign and Knowledge supports Remove. A Capability may be deleted only when it has no mappings; deletion removes its owned current Knowledge, level and Practices, and cleans all Role Scope references atomically. These operations do not create revision history, undo, soft delete or archives.
 
 ## Product and Frontend Surface
 
@@ -197,7 +205,7 @@ Capability UUID exclusions for each Role. It does not belong to Capability,
 PersonalCapabilityState, SourceMapping, CapabilityKnowledge or RoadmapVersion.
 There are no include records, selected-set snapshots, counts, reasons, revision
 history, archive or scope-version lifecycle. Absence of an exclusion means
-Included, including for upgraded data and a newly mapped Capability.
+Included, including for a newly mapped Capability.
 
 ```text
 current Role-relevant mapped Capabilities
@@ -232,80 +240,24 @@ Include All, Exclude All or bulk editor.
 
 ## Roadmap Input, Readiness and History
 
-The implemented pipeline order is:
-
 ```text
 Role-relevant mapped Capabilities
 → apply Role Roadmap Scope
-→ effective selected Capabilities
 → collect selected Knowledge, Level, Practice and Market inputs
-→ Roadmap input
-→ canonical fingerprint
-→ semantic handoff
+→ canonical fingerprint → semantic handoff
 ```
 
-Filtering occurs before Capability input collection. The fingerprint represents
-the effective Roadmap input, never the raw exclusion document. Consequently,
-changes to excluded Capability Knowledge, Level, Practice or other Roadmap-only
-facts do not change the current fingerprint. The same changes for an included
-Capability preserve the existing stale semantics. Include/Exclude changes alter
-the selected set and therefore the fingerprint, mark the latest Roadmap as
-inputs-changed, and cause the existing save-time fingerprint validation to
-reject an older prepared result without a new Scope-specific stale entity.
+Filtering precedes Capability input collection. The fingerprint represents effective prepared input, not the exclusion document. Changes to excluded Capability Knowledge, Level or Practice do not stale the Roadmap; changes to included input or selected membership do. Existing save-time fingerprint validation rejects outdated prepared results without a separate Scope stale state.
 
-Generation continues to require current analyzed Market input and a resolved
-Inbox, and additionally requires at least one effective selected mapped
-Capability. “No mapped/relevant Capability” and “relevant Capabilities exist but
-all are excluded” are different blockers; the latter directs the user to include
-at least one Capability in My Learning. Either blocker prevents only Prepare and
-new generation. Retained history remains listable, openable, exportable and
-deletable.
+Generation blockers, immutable history and retention are defined in [Roadmap Generation and History](#roadmap-generation-and-history). No relevant mapped Capability and all relevant Capabilities excluded are distinct blockers; the latter directs the user to include a Capability in My Learning. Both block only Prepare/Generate, preserving access to retained history. RoadmapVersion stores content, fingerprint and generation metadata, without selected/excluded snapshots.
 
-RoadmapVersion remains the current minimal immutable record: generated content,
-input fingerprint and generation metadata. Scope changes never rewrite retained
-content or historical fingerprints and do not add selected/excluded snapshots
-by default. With no exclusions, the current implementation preserves the input
-shape and ordering, so existing fingerprints remain comparable without bulk
-migration; future selected inputs naturally receive new fingerprints.
-
-My Learning Detail is the only Scope mutation surface and states that the choice
-applies only to the current Role and does not remove Mapping, Knowledge, Level,
-Practice or Market data. My Learning list adds only an In Roadmap/Excluded status
-indicator. Roadmap adds `selected / relevant` summary and a Manage in My Learning
-link, not another editor. All system-owned copy uses the existing `zh-CN`/`en`
-catalog, Web-boundary feedback localization and catalog parity tests; locale
-never enters Scope state, Core rules, fingerprints or Skill input.
+My Learning Detail is the only Scope editor; its list shows In Roadmap/Excluded. Roadmap shows selected/relevant counts and a Manage in My Learning link. UI copy uses the shared locale catalogs; locale never enters Scope or generation input.
 
 ## Lightweight Learning Map
 
-Roadmap organizes learning progression; it does not rank universal Capability
-importance. For the authoritative selected Capability set, generation may use
-supplied CapabilityKnowledge prerequisites/core topics, Personal Level,
-Practices and Market context to identify foundations, capabilities that build on
-them, parallel learning and later or largely independent extensions. These are
-current best learning arrangements derived during generation and written only
-into immutable Roadmap content, not durable Capability topology.
+Learning Maps organize progression among the authoritative selected Capabilities using supported Knowledge, user-selected Level, actual Practices and Market context. They may identify foundations, supported build-on relations, parallel learning and independent extensions, but never invent hard prerequisites to force a chain. Bounded source consultation clarifies existing topics; it cannot establish a new cross-Capability prerequisite absent from supplied Knowledge.
 
-The Skill must not invent hard prerequisites to force a neat chain. A relation
-may be parallel, independent or absent. A Capability already supported by strong
-Level and Practice evidence may serve as a foundation without consuming a major
-new learning stage. Practices may inform readiness but cannot create a formal
-Capability. Broad selected sets favor a compact map and coarse waves for
-orientation; focused sets may receive more actionable, detailed and
-practice-oriented phases. This density adjustment is qualitative, not a count
-threshold or a new Roadmap type.
-
-Only supplied selected Capabilities may become map nodes, stages, topics,
-Practice guidance or acceptance/mastery content. Market-only, unmapped, skipped
-and excluded signals remain contextual evidence and cannot re-enter formal
-learning content. The existing missing-Knowledge boundary remains: a selected
-Capability in research-needed mode may use its supplied name, relevance, Level
-and actual Practices and recommend research, but neither Market context nor
-model memory may fabricate curriculum, projects or mastery criteria.
-
-No Capability priority/importance score, weight, P0/P1/P2 label, persistent
-dependency/edge/graph store, relationship research Skill or graph lifecycle is
-part of the current architecture.
+Established foundations need not consume a major learning stage. Broad Scope favors a compact map and coarse waves; focused Scope permits deeper practice guidance without a mechanical count threshold or separate Roadmap type. Relationships live only in generated content, without an objective ontology, persistent graph, importance scores, weights or priority labels. Formal-learning and missing-Knowledge boundaries remain those in [Roadmap Generation and History](#roadmap-generation-and-history).
 
 ## Public Runtime and Agent Boundary
 
@@ -313,7 +265,8 @@ The public product is **local-first**, not fully offline. Role, JD, Capability,
 Knowledge, personal state, Practice and Roadmap files are stored in the user's
 local `state/` directory. When a user explicitly runs an Agent Skill, the
 selected Agent product processes the repository and state inputs required by
-that Skill; Knowledge Research additionally requires web access. Public claims
+that Skill; Knowledge Research requires web access, and Roadmap may consult
+Knowledge sources for task details. Public claims
 must not imply that all data always remains local or that every workflow works
 offline.
 
@@ -321,6 +274,7 @@ Codex is the reference and end-to-end tested Agent environment. The four Skill
 packages use the open Agent Skills directory and `SKILL.md` format, but format
 compatibility alone does not prove workflow compatibility. Another Agent needs
 repository and shared-state file access, local write access for the prepared
-handoff result, and Python 3.11+ execution; Knowledge Research also needs web
-access. Other compatible Agents remain experimental until independently
+handoff result, and Python 3.11+ execution; Knowledge Research needs web access,
+and Roadmap declares conditional web access for source consultation. Other
+compatible Agents remain experimental until independently
 verified end to end.

@@ -15,9 +15,9 @@ retain decisions such as Add, Merge, Skip, personal Level, Practice, and Roadmap
 Scope. The application does not call a remote language-model API in the
 background. The interface supports `zh-CN` and English.
 
-This is the public source tree for `v2.3.1`, the current maintenance release,
+This source tree is being prepared for `v2.3.2`, the current maintenance version,
 in [`firmisim/job-learning-planner`](https://github.com/firmisim/job-learning-planner).
-`v2.3.0` remains the first public release.
+Release publication is pending; see [project status](docs/PROJECT_STATUS.md).
 
 ## Why this exists
 
@@ -151,7 +151,7 @@ The repository contains four open-format Agent Skills under `.agents/skills/`:
 | `jd-analysis` | Market has prepared current-Role JDs for evidence-traceable Capability-signal extraction. |
 | `capability-analysis` | You want non-binding Add, Merge, or Skip advice for prepared Inbox candidates. |
 | `capability-knowledge-research` | A prepared Capability needs source-backed Knowledge or a refresh. This Skill requires web access. |
-| `job-learning-roadmap` | Roadmap has prepared the selected Capability set, Knowledge, personal state, and Market context. |
+| `job-learning-roadmap` | Roadmap has prepared the selected Capability set, Knowledge, personal state, and Market context. It may use web access to clarify task details from Knowledge sources. |
 
 The repository provides task specifications and workflow instructions as Agent
 Skills; an Agent environment executes them. Codex is the reference environment
@@ -177,8 +177,9 @@ Job Learning Planner does not run a background Agent, scheduler, or task queue.
 The Skills follow the open Agent Skills directory and `SKILL.md` format, but
 format compatibility is not proof of end-to-end compatibility. Another Agent
 must be able to discover the Skills, read and write this repository and the same
-local `state/`, and run Python 3.11+. Knowledge Research additionally requires
-web access. Compatibility with other products remains experimental until
+local `state/`, and run Python 3.11+. Knowledge Research requires web access;
+Roadmap may need it for bounded consultation of Knowledge sources.
+Compatibility with other products remains experimental until
 independently verified; evidence-led community compatibility reports are
 welcome.
 
@@ -196,10 +197,10 @@ product you selected accesses and processes the repository and state inputs
 needed for that task. Its handling of that data is governed by that product or
 provider's privacy and data policies.
 
-`capability-knowledge-research` also uses web access. Research queries and
-relevant task context may therefore be processed by the selected Agent and web
-tooling. This repository itself does not operate a cloud service that stores
-application state.
+`capability-knowledge-research` uses web access, and `job-learning-roadmap` may
+consult Knowledge sources to clarify task details. Relevant queries and task
+context may therefore be processed by the selected Agent and web tooling. This
+repository itself does not operate a cloud service that stores application state.
 
 ## Known limitations
 
